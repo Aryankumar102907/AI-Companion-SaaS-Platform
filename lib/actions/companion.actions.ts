@@ -1,10 +1,10 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabseClient } from "@/lib/supabase";
+import { createSupabaseClient } from "@/lib/supabase";
 
 export const createCompanion = async (formData: CreateCompanion) => {
   const { userId: author } = await auth();
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
 
   const { data, error } = await supabase
     .from("companions")
@@ -24,7 +24,7 @@ export const getAllCompanions = async ({
   subject,
   topic,
 }: GetAllCompanions) => {
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
 
   let query = supabase.from("companions").select();
 
@@ -49,7 +49,7 @@ export const getAllCompanions = async ({
 
 // One companion only
 export const getCompanion = async (id: string) => {
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
 
   const { data, error } = await supabase
     .from("companions")
@@ -64,7 +64,7 @@ export const getCompanion = async (id: string) => {
 
 export const addToSessionHistory = async (companionId: string) => {
   const { userId } = await auth();
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
   const { data, error } = await supabase.from('session_history')
     .insert({
       companion_id: companionId,
@@ -78,10 +78,12 @@ export const addToSessionHistory = async (companionId: string) => {
 
 
 export const getRecentSessions = async (limit = 10) => {
-  const supabase = createSupabseClient();
+  const { userId } = await auth();
+  const supabase = createSupabaseClient();
   const { data, error } = await supabase
     .from('session_history')
     .select(`companions:companion_id (*)`)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(limit)
   
@@ -92,7 +94,7 @@ export const getRecentSessions = async (limit = 10) => {
 
 
 export const getUserSessions = async (userId: string, limit = 10) => {
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
   const { data, error } = await supabase
     .from('session_history')
     .select(`companions:companion_id (*)`)
@@ -107,7 +109,7 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 
 
 export const getUserCompanions = async (userId: string) => {
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
   const { data, error } = await supabase
     .from('companions')
     .select()
@@ -121,7 +123,7 @@ export const getUserCompanions = async (userId: string) => {
 // Enforcing Clerk Rules in my SAAS Platform
 export const newCompanionPermissions = async () => {
   const { userId, has } = await auth();
-  const supabase = createSupabseClient();
+  const supabase = createSupabaseClient();
 
   let limit = 0;
 

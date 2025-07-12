@@ -119,7 +119,17 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName, userI
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING)
 
-    vapi.start(configureAssistant(voice, style));
+    const assistantOverrides = {
+      variableValues: {
+        subject, topic, style
+      },
+      clientMessages: ['transcript'],
+      serverMessages: [],
+    }
+
+    // @ts-expect-error because vapi.start typing doesn't allow override types
+
+    vapi.start(configureAssistant(voice, style), assistantOverrides);
   }
 
   const handleDisconnect = () => {
